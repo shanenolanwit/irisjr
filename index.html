@@ -2,13 +2,29 @@
 <html>
 
 <head>
-  <title>Socket.IO chat</title>
+  <title>Socket.IO chart</title>
 
   <link rel="stylesheet" href="/css/billboard.min.css" type="text/css">
 </head>
 
 <body>
   <div id="chart"></div>
+  <table id="contact" class="table">
+    <thead>
+      <tr>
+        <th>IP</th>
+        <th>OS Name</th>
+        <th>Uptime</th>
+        <th>CPU Speed GHZ</th>
+        <th>Memory Total</th>
+        <th>Memory Free</th>
+        <th>Memory Used</th>
+        <th>CPU Current Load</th>
+        <th>Last Contact</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
   <script src="/js/d3.v5.min.js"></script>
   <!-- Step 2) Load billboard.js with style -->
   <script src="/js/billboard.min.js" type="text/javascript"></script>
@@ -17,6 +33,7 @@
   <script src="/socket.io/socket.io.js"></script>
   <script src="/js/jquery-3.3.1.min.js"></script>
   <script>
+    var count = 0;
     $(function () {
       var socket = io();
 
@@ -24,36 +41,65 @@
 
 
       var chart = bb.generate({
+        
         data: {
-          x: "x",
-          columns: [ 
-            ["x", "2018-01-11", "2018-01-21"],
-            ["data1", 500, 200],
-            ["data2", 100, 300],
-            ["data3", 200, 120]
+          x: "time",
+          xFormat: '%Y-%m-%d %H:%M:%S',
+          columns: [
+
           ]
+        },
+        line: {
+          connectNull: true
         },
         axis: {
           x: {
             type: "timeseries",
             tick: {
-              format: "%m/%d"
-            }
+              fit: true,
+              format: '%H:%M:%S' // how the date is displayed
+            }            
           }
         },
         bindto: "#chart"
       });
-      socket.on('custom-event', function (value) {
-        console.log("better update the charts " + value);
+      socket.on('aws-event', function (value) {
+         if ($("#" +value.ip).length) {
+          $("#" +value.ip + " .time").html(value.time);
+        } else {
+          $("#contact.table tbody").append(
+            "<tr id='" + value.ip + "'>"
+              + "<td>" + value.ip + "</td>" 
+              + "<td>" + value.osName + "</td>"
+              + "<td>" + value.uptime + "</td>"
+              + "<td>" + value.cpuSpeedGHZ + "</td>"
+              + "<td>" + value.memTotal + "</td>"
+              + "<td>" + value.memFree + "</td>"
+              + "<td>" + value.memUsed + "</td>"
+              + "<td>" + value.cpuCurrentLoad + "</td>"
+              + "<td class='time'>" + value.time + "</td></tr>");
+        }
+        var dataLengths = chart
+          .data()
+          .map((col) => col.values.map((item) => item.value))
+          .map((values) => values.length);
+        var maxListLength = 0;
+        for (var i = 0; i < dataLengths.length; i++) {
+          if (maxListLength < dataLengths[i]) {
+            maxListLength = dataLengths[i];
+          }
+        }
+
+        var tickLength = maxListLength >= 10 ? 1 : 0;
+
+        console.log(count);
         chart.flow({
           columns: [
-            ["x", "2018-02-11", "2018-02-12", "2018-02-13", "2018-02-14"],
-            ["data1", Math.floor(Math.random() * 300), Math.floor(Math.random() * 300), Math.floor(Math.random() * 300), Math.floor(Math.random() * 300)],
-            ["data2", Math.floor(Math.random() * 300), Math.floor(Math.random() * 300), Math.floor(Math.random() * 300), Math.floor(Math.random() * 300)],
-            ["data3", Math.floor(Math.random() * 300), Math.floor(Math.random() * 300), Math.floor(Math.random() * 300), Math.floor(Math.random() * 300)]
+            ["time", value.time],
+            [value.ip, value.cpuCurrentLoad]
           ],
-          length: 1,
-          duration: 1500
+          length: tickLength,
+          done: function () { chart.flush() }
         });
       });
 
