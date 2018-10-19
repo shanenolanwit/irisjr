@@ -1,0 +1,24 @@
+{
+  "name": "irisjr",
+  "version": "1.0.0",
+  "description": "Based on the iris app",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no tests specified\" && exit 1",
+    "start": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shanenolanwit/irisjr"
+  },
+  "author": "Shane Nolan",
+  "bugs": {
+    "url": "https://github.com/shanenolanwit/irisjr/issues"
+  },
+  "homepage": "https://github.com/shanenolanwit/irisjr",
+  "dependencies": {
+    "billboard.js": "^1.6.2",
+    "express": "^4.16.2",
+    "socket.io": "^2.0.4"
+  }
+}
