@@ -4,7 +4,9 @@
 <head>
   <title>Socket.IO chart</title>
 
-  <link rel="stylesheet" href="/css/billboard.min.css" type="text/css">
+  <link rel="stylesheet" href="/css/billboard/billboard.min.css" type="text/css">
+  <link href="/css/bootstrap/bootstrap.css" rel="stylesheet" type="text/css">
+
 </head>
 
 <body>
@@ -25,23 +27,23 @@
     </thead>
     <tbody></tbody>
   </table>
-  <script src="/js/d3.v5.min.js"></script>
+  <script src="/js/d3/d3.min.js"></script>
   <!-- Step 2) Load billboard.js with style -->
-  <script src="/js/billboard.min.js" type="text/javascript"></script>
+  <script src="/js/billboard/billboard.min.js" type="text/javascript"></script>
 
 
   <script src="/socket.io/socket.io.js"></script>
-  <script src="/js/jquery-3.3.1.min.js"></script>
+  <script src="/js/jquery/jquery.min.js"></script>
   <script>
     var count = 0;
     $(function () {
       var socket = io();
 
-      //socket.emit('custom-event', "hewwwwlllloooo");
-
-
       var chart = bb.generate({
-        
+        tooltip: {
+          show: false
+        },
+
         data: {
           x: "time",
           xFormat: '%Y-%m-%d %H:%M:%S',
@@ -58,26 +60,26 @@
             tick: {
               fit: true,
               format: '%H:%M:%S' // how the date is displayed
-            }            
+            }
           }
         },
         bindto: "#chart"
       });
       socket.on('aws-event', function (value) {
-         if ($("#" +value.ip).length) {
-          $("#" +value.ip + " .time").html(value.time);
+        if (document.getElementById(value.ip) != null) {
+          $(document.getElementById(value.ip)).find(".time").html(value.time);
         } else {
           $("#contact.table tbody").append(
             "<tr id='" + value.ip + "'>"
-              + "<td>" + value.ip + "</td>" 
-              + "<td>" + value.osName + "</td>"
-              + "<td>" + value.uptime + "</td>"
-              + "<td>" + value.cpuSpeedGHZ + "</td>"
-              + "<td>" + value.memTotal + "</td>"
-              + "<td>" + value.memFree + "</td>"
-              + "<td>" + value.memUsed + "</td>"
-              + "<td>" + value.cpuCurrentLoad + "</td>"
-              + "<td class='time'>" + value.time + "</td></tr>");
+            + "<td>" + value.ip + "</td>"
+            + "<td>" + value.osName + "</td>"
+            + "<td>" + value.uptime + "</td>"
+            + "<td>" + value.cpuSpeedGHZ + "</td>"
+            + "<td>" + value.memTotal + "</td>"
+            + "<td>" + value.memFree + "</td>"
+            + "<td>" + value.memUsed + "</td>"
+            + "<td>" + value.cpuCurrentLoad + "</td>"
+            + "<td class='time'>" + value.time + "</td></tr>");
         }
         var dataLengths = chart
           .data()
@@ -92,14 +94,13 @@
 
         var tickLength = maxListLength >= 10 ? 1 : 0;
 
-        console.log(count);
         chart.flow({
           columns: [
             ["time", value.time],
             [value.ip, value.cpuCurrentLoad]
           ],
           length: tickLength,
-          done: function () { chart.flush() }
+          done: function () { chart.flush(); }
         });
       });
 

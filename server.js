@@ -7,24 +7,24 @@ var dateFormat = require('dateformat');
 
 var io = require('socket.io')(http);
 app.use(express.json());
-app.get('/', function(req, res){
+app.get('/', function (req, res) {
   res.sendFile(__dirname + '/index.html');
 });
 
 
-app.post('/aws', function(req, res){
-  
+app.post('/aws', function (req, res) {
+
   console.log(req.body);
   var custTime = dateFormat(new Date(), "yyyy-mm-dd h:MM:ss");
   var data = {
-    time: custTime, 
+    time: custTime,
     ip: req.body.ip,
-    osName: req.body.osName, 
-    uptime: req.body.uptime, 
+    osName: req.body.osName,
+    uptime: req.body.uptime,
     cpuSpeedGHZ: req.body.cpuSpeedGHZ,
-    memTotal: req.body.memTotal, 
+    memTotal: req.body.memTotal,
     memFree: req.body.memFree,
-    memUsed: req.body.memUsed, 
+    memUsed: req.body.memUsed,
     cpuCurrentLoad: req.body.cpuCurrentLoad
   }
   console.log(data);
@@ -34,18 +34,24 @@ app.post('/aws', function(req, res){
 
 app.use(express.static('public'));
 
-io.on('connection', function(socket){
+io.on('connection', function (socket) {
   console.log('a user connected');
 
-  socket.on('custom-event', function(value){
-    console.log("got this : " + value);    
+  socket.on('custom-event', function (value) {
+    console.log("got this : " + value);
   });
 
-  socket.on('disconnect', function(){
+  socket.on('disconnect', function () {
     console.log('user disconnected');
   });
 });
 
-http.listen(3000, function(){
+http.listen(3000, function () {
   console.log('listening on *:3000');
 });
+
+app.use('/js/jquery', express.static(__dirname + '/node_modules/jquery/dist/'));
+app.use('/js/d3', express.static(__dirname + '/node_modules/d3/dist/'));
+app.use('/js/billboard', express.static(__dirname + '/node_modules/billboard.js/dist/'));
+app.use('/css/bootstrap', express.static(__dirname + '/node_modules/bootstrap/dist/css/'));
+app.use('/css/billboard', express.static(__dirname + '/node_modules/billboard.js/dist/'));
