@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title>Socket.IO chart</title>
+  <title>Iris Jr</title>
 
   <link rel="stylesheet" href="/css/billboard/billboard.min.css" type="text/css">
   <link href="/css/bootstrap/bootstrap.css" rel="stylesheet" type="text/css">
@@ -10,18 +10,37 @@
 </head>
 
 <body>
-  <div id="chart"></div>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-12" style="background-color: black"><h2 class="text-center"><img src="/images/irisjunior.png"/></h2></div>
+    </div>
+    <div class="row">
+      <div id="chart-filter" class="col-md-2">
+        <h4>Filters</h4>
+        <div class="form-check"><label class="form-check-label"><input type="radio" class="form-check-input" name="filter"
+              value="cpuCurrentLoad" checked="checked">CPU Current Load</label></div>
+        <div class="form-check"><label class="form-check-label"><input type="radio" class="form-check-input" name="filter"
+              value="memFree">Memory Free</label></div>
+        <div class="form-check"><label class="form-check-label"><input type="radio" class="form-check-input" name="filter"
+              value="memUsed">Memory Used</label></div>
+      </div>
+      <div class="col-md-10">
+        <div id="chart"></div>
+      </div>
+    </div>
+  </div>
+
   <table id="contact" class="table">
     <thead>
       <tr>
         <th>IP</th>
         <th>OS Name</th>
-        <th>Uptime</th>
+        <th>CPU Current Load</th>
         <th>CPU Speed GHZ</th>
         <th>Memory Total</th>
         <th>Memory Free</th>
         <th>Memory Used</th>
-        <th>CPU Current Load</th>
+        <th>Uptime</th>
         <th>Last Contact</th>
       </tr>
     </thead>
@@ -35,7 +54,7 @@
   <script src="/socket.io/socket.io.js"></script>
   <script src="/js/jquery/jquery.min.js"></script>
   <script>
-    var count = 0;
+    var filterName = "cpuCurrentLoad";
     $(function () {
       var socket = io();
 
@@ -67,18 +86,29 @@
       });
       socket.on('aws-event', function (value) {
         if (document.getElementById(value.ip) != null) {
-          $(document.getElementById(value.ip)).find(".time").html(value.time);
+          var row = $(document.getElementById(value.ip));
+          row.html(
+            "<td>" + value.ip + "</td>"
+            + "<td>" + value.osName + "</td>"
+            + "<td class='cpuCurrentLoad'>" + value.cpuCurrentLoad + "</td>"
+            + "<td class='cpuSpeedGHZ'>" + value.cpuSpeedGHZ + "</td>"
+            + "<td class='memTotal'>" + value.memTotal + "</td>"
+            + "<td class='memFree'>" + value.memFree + "</td>"
+            + "<td class='memUsed'>" + value.memUsed + "</td>"
+            + "<td class='uptime'>" + value.uptime + "</td>"
+            + "<td class='time'>" + value.time + "</td>"
+          );
         } else {
           $("#contact.table tbody").append(
             "<tr id='" + value.ip + "'>"
             + "<td>" + value.ip + "</td>"
             + "<td>" + value.osName + "</td>"
-            + "<td>" + value.uptime + "</td>"
-            + "<td>" + value.cpuSpeedGHZ + "</td>"
-            + "<td>" + value.memTotal + "</td>"
-            + "<td>" + value.memFree + "</td>"
-            + "<td>" + value.memUsed + "</td>"
-            + "<td>" + value.cpuCurrentLoad + "</td>"
+            + "<td class='cpuCurrentLoad'>" + value.cpuCurrentLoad + "</td>"
+            + "<td class='cpuSpeedGHZ'>" + value.cpuSpeedGHZ + "</td>"
+            + "<td class='memTotal'>" + value.memTotal + "</td>"
+            + "<td class='memFree'>" + value.memFree + "</td>"
+            + "<td class='memUsed'>" + value.memUsed + "</td>"
+            + "<td class='uptime'>" + value.uptime + "</td>"
             + "<td class='time'>" + value.time + "</td></tr>");
         }
         var dataLengths = chart
@@ -94,10 +124,30 @@
 
         var tickLength = maxListLength >= 10 ? 1 : 0;
 
+        var radioValue = $("input[name='filter']:checked").val();
+        if(radioValue != filterName){
+          console.log("radio value v filter " + radioValue + " v " + filter);
+          filterName = radioValue;
+           tickLength = maxListLength;
+        }
+        switch (radioValue) {
+          case "cpuCurrentLoad":
+            filter = value.cpuCurrentLoad;
+            break;
+          case "memFree":
+            filter = value.memFree;
+            break;
+          case "memUsed":
+            filter = value.memUsed;
+            break;
+          default:
+            filter = value.cpuCurrentLoad;;
+        }
+
         chart.flow({
           columns: [
             ["time", value.time],
-            [value.ip, value.cpuCurrentLoad]
+            [value.ip, filter]
           ],
           length: tickLength,
           done: function () { chart.flush(); }

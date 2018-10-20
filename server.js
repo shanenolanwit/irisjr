@@ -27,7 +27,7 @@ app.post('/aws', function (req, res) {
     memUsed: req.body.memUsed,
     cpuCurrentLoad: req.body.cpuCurrentLoad
   }
-  console.log(data);
+  
   io.emit('aws-event', data);
   res.status(200).send(req.body);
 });
@@ -55,3 +55,4 @@ app.use('/js/d3', express.static(__dirname + '/node_modules/d3/dist/'));
 app.use('/js/billboard', express.static(__dirname + '/node_modules/billboard.js/dist/'));
 app.use('/css/bootstrap', express.static(__dirname + '/node_modules/bootstrap/dist/css/'));
 app.use('/css/billboard', express.static(__dirname + '/node_modules/billboard.js/dist/'));
+app.use('/images', express.static(__dirname + '/public/images/'));
